@@ -1,0 +1,179 @@
+-- Consulta 1 (Com JOIN) -> Exibir a loja que mais vendeu em janeiro (Inclui ID e nome da loja):
+
+SELECT
+	lojas.id,
+    	lojas.nome,
+	SUM(vendas.valor_total) AS total_vendido
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+WHERE MONTH(vendas.data_venda) = 1
+GROUP BY lojas.id, lojas.nome
+ORDER BY total_vendido DESC
+LIMIT 1;
+
+-- Consulta 2 (Com JOIN) -> Exibir o ranking de vendas de fevereiro (Inclui ID e nome da loja):
+
+SELECT
+	lojas.id,
+    	lojas.nome,
+    	SUM(vendas.valor_total) AS total_vendido
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+WHERE MONTH(vendas.data_venda) = 2
+GROUP BY lojas.id, lojas.nome
+ORDER BY total_vendido DESC;
+
+-- Consulta 3 (Com JOIN) -> Exibir as lojas que faturaram entre 820 e 840 reais em junho (Inclui ID e nome da loja):
+
+SELECT
+	lojas.id,
+    	lojas.nome,
+    	SUM(vendas.valor_total) AS total_vendido
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+WHERE MONTH(vendas.data_venda) = 6
+GROUP BY lojas.id, lojas.nome
+HAVING SUM(vendas.valor_total) BETWEEN 820 and 840;
+
+-- Consulta 4 (Com JOIN) -> Exibir as lojas que faturaram acima de 300 reais em dezembro (Inclui ID e nome da loja):
+
+SELECT
+	lojas.id,
+	lojas.nome,
+	SUM(vendas.valor_total) AS total_vendido
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+WHERE MONTH(vendas.data_venda) = 12
+GROUP BY lojas.id, lojas.nome
+HAVING SUM(vendas.valor_total) > 300;
+
+-- Consulta 5 -> (Com JOIN) -> Exibir a loja que mais vendeu durante o ano (Inclui ID e nome da loja):
+
+SELECT
+	lojas.id,
+	lojas.nome,
+	SUM(vendas.valor_total) AS total_vendido
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+GROUP BY lojas.id, lojas.nome
+ORDER BY total_vendido DESC
+LIMIT 1;
+
+-- Consulta 6 (Com JOIN) -> Exibir o cliente que mais gastou durante o ano (Inclui ID e nome do cliente):
+
+SELECT
+	clientes.id,
+	clientes.nome,
+	SUM(vendas.valor_total) AS total_gasto
+FROM vendas
+JOIN clientes ON clientes.id = vendas.id_cliente
+GROUP BY clientes.id, clientes.nome
+ORDER BY total_gasto DESC
+LIMIT 1;
+
+-- Consulta 7 (Com JOIN) -> Exibir o cliente que mais gastou em agosto (Inclui ID e nome do cliente):
+
+SELECT
+	clientes.id,
+	clientes.nome,
+	SUM(vendas.valor_total) AS total_gasto
+FROM vendas
+JOIN clientes ON clientes.id = vendas.id_cliente
+WHERE MONTH(vendas.data_venda) = 8
+GROUP BY clientes.id, clientes.nome
+ORDER BY total_gasto DESC
+LIMIT 1;
+
+-- Consulta 8 (Com 5 JOIN) -> Exibir o relatório das vendas de novembro (Inclui dados de várias tabelas associadas):
+
+SELECT
+	vendas.id AS id_venda,
+	vendas.data_venda,
+	vendas.valor_total,
+
+	lojas.id AS id_loja,
+	lojas.nome AS nome_loja,
+
+	lojas_detalhes.telefone AS telefone_loja,
+	lojas_detalhes.endereco AS endereco_loja,
+
+	clientes.id AS id_cliente,
+	clientes.nome AS nome_cliente,
+
+	clientes_perfil.preferencias AS preferencias_cliente,
+
+	formas_pagamento.nome AS forma_pagamento
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+JOIN lojas_detalhes ON lojas_detalhes.id_loja = lojas.id
+JOIN clientes ON clientes.id = vendas.id_cliente
+JOIN clientes_perfil ON clientes_perfil.id_cliente = clientes.id
+JOIN formas_pagamento ON formas_pagamento.id = vendas.id_forma_pagamento
+WHERE MONTH(vendas.data_venda) = 11;
+
+-- Consulta 9 (Com 5 JOIN) -> Exibir o relatório das vendas de agosto (Inclui dados de várias tabelas associadas):
+
+SELECT
+	vendas.id AS id_venda,
+	vendas.data_venda,
+	vendas.valor_total,
+
+	lojas.id AS id_loja,
+	lojas.nome AS nome_loja,
+
+	lojas_detalhes.telefone AS telefone_loja,
+	lojas_detalhes.endereco AS endereco_loja,
+
+	clientes.id AS id_cliente,
+	clientes.nome AS nome_cliente,
+
+	clientes_perfil.preferencias AS preferencias_cliente,
+
+	formas_pagamento.nome AS forma_pagamento
+FROM vendas
+JOIN lojas ON lojas.id = vendas.id_loja
+JOIN lojas_detalhes ON lojas_detalhes.id_loja = lojas.id
+JOIN clientes ON clientes.id = vendas.id_cliente
+JOIN clientes_perfil ON clientes_perfil.id_cliente = clientes.id
+JOIN formas_pagamento ON formas_pagamento.id = vendas.id_forma_pagamento
+WHERE MONTH(vendas.data_venda) = 8;
+
+-- Consulta 10 -> Total de ganhos por loja:
+
+SELECT 
+    lojas.id AS id_loja,
+    (SELECT SUM(vendas.valor_total) 
+     FROM vendas 
+     WHERE vendas.id_loja = lojas.id) AS valor_total
+FROM lojas;
+
+-- Consulta 11 -> Clientes que gastaram mais de 1000 em compras:
+
+SELECT vendas.id_cliente
+FROM vendas
+GROUP BY vendas.id_cliente
+HAVING SUM(vendas.valor_total) > 1000;
+
+-- Consulta 12 -> Vendas acima de 500 reais:
+
+SELECT 
+    id AS id_venda,
+    id_loja,
+    id_cliente,
+    data_venda,
+    valor_total
+FROM vendas
+WHERE valor_total > 500
+ORDER BY data_venda ASC;
+
+-- Consulta 13 -> Vendas acima da média:
+
+SELECT *
+FROM vendas
+WHERE vendas.valor_total > (SELECT AVG(vendas.valor_total) FROM vendas);
+
+-- Consulta 14 -> Quantidade de uso das formas de pagamento:
+
+SELECT vendas.id_forma_pagamento, COUNT(*) AS quantidade_uso
+FROM vendas
+GROUP BY vendas.id_forma_pagamento;
